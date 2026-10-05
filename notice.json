@@ -1,6 +1,6 @@
 {
-  "version": "1.2.0",
-  "min_required_version": "1.0.0",
-  "download_url": "https://github.com/username/repo/releases/tag/v1.2.0",
-  "changelog": "1. 修复已知 Bug\n2. 提升运行速度"
+  "show": true,
+  "title": "温馨提示",
+  "content": "如遇播放卡顿，可在播放界面切换备用线路。本软件完全免费，请勿相信片中任何博彩、刷单等黑产诈骗广告！",
+  "version": "1.0.0"
 }
