@@ -1,6 +1,365 @@
-{
-  "show": true,
-  "title": "温馨提示",
-  "content": "如遇播放卡顿，可在播放界面切换备用线路。本软件完全免费，请勿相信片中任何博彩、刷单等黑产诈骗广告！",
-  "version": "1.0.0"
-}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>重要公告</title>
+<style>
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    background:#0a0a0a;
+    color:#fff;
+    font-family:"Netflix Sans","Helvetica Neue",Helvetica,Arial,
+                "PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+
+  /* ================= 背景 ================= */
+  .backdrop{
+    position:fixed; inset:0; overflow:hidden;
+    background:
+      radial-gradient(1200px 600px at 50% -12%, rgba(229,9,20,.20), transparent 62%),
+      #0a0a0a;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:14px;
+    padding:24px;
+    height:100%;
+    opacity:.5;
+    filter:blur(3px) saturate(.65);
+    transform:scale(1.06);
+  }
+  .poster{
+    border-radius:6px;
+    aspect-ratio:2/3;
+    background:#151515;
+  }
+  .vignette{
+    position:fixed; inset:0; pointer-events:none;
+    background:radial-gradient(circle at 50% 42%,
+                transparent 0%, rgba(0,0,0,.5) 58%, #000 100%);
+  }
+
+  /* ================= 遮罩层 ================= */
+  .overlay{
+    position:fixed; inset:0; z-index:100;
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+    background:rgba(0,0,0,.72);
+    -webkit-backdrop-filter:blur(7px);
+    backdrop-filter:blur(7px);
+    opacity:0;
+    animation:fadeIn .35s ease forwards;
+  }
+  @keyframes fadeIn{ to{ opacity:1; } }
+  .overlay.closing{ animation:fadeOut .25s ease forwards; }
+  @keyframes fadeOut{ to{ opacity:0; } }
+
+  /* ================= 弹窗主体 ================= */
+  .modal{
+    position:relative;
+    width:100%;
+    max-width:560px;
+    padding:44px 40px 34px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.08);
+    background:linear-gradient(160deg,#1c1c1c 0%,#141414 55%,#0d0d0d 100%);
+    box-shadow:
+      0 30px 80px rgba(0,0,0,.85),
+      0 0 0 1px rgba(0,0,0,.5),
+      0 0 60px rgba(229,9,20,.06);
+    overflow:hidden;
+    opacity:0;
+    transform:translateY(26px) scale(.96);
+    animation:popIn .5s cubic-bezier(.2,.8,.25,1) .06s forwards;
+  }
+  @keyframes popIn{
+    to{ opacity:1; transform:translateY(0) scale(1); }
+  }
+  .modal.closing{ animation:popOut .25s ease forwards; }
+  @keyframes popOut{
+    to{ opacity:0; transform:translateY(12px) scale(.97); }
+  }
+
+  /* 顶部红色高亮条 */
+  .modal::before{
+    content:"";
+    position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg,#7a0409,#E50914,#ff4b52,#E50914,#7a0409);
+  }
+  /* 右上角红色光晕 */
+  .modal::after{
+    content:"";
+    position:absolute; top:-130px; right:-130px;
+    width:300px; height:300px; pointer-events:none;
+    background:radial-gradient(circle, rgba(229,9,20,.20), transparent 70%);
+  }
+
+  /* ================= 关闭按钮 ================= */
+  .close{
+    position:absolute; top:16px; right:16px; z-index:2;
+    width:34px; height:34px;
+    display:flex; align-items:center; justify-content:center;
+    border:none; border-radius:50%;
+    background:rgba(255,255,255,.06);
+    color:#fff; cursor:pointer;
+    transition:background .2s, transform .25s;
+  }
+  .close:hover{ background:rgba(255,255,255,.16); transform:rotate(90deg); }
+  .close:active{ transform:rotate(90deg) scale(.92); }
+
+  /* ================= 内容 ================= */
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:12px; font-weight:700;
+    letter-spacing:.18em;
+    color:#E50914;
+    text-transform:uppercase;
+    margin-bottom:14px;
+  }
+  .eyebrow .dot{
+    width:7px; height:7px; border-radius:50%;
+    background:#E50914;
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse{
+    0%  { box-shadow:0 0 0 0 rgba(229,9,20,.65); }
+    70% { box-shadow:0 0 0 10px rgba(229,9,20,0); }
+    100%{ box-shadow:0 0 0 0 rgba(229,9,20,0); }
+  }
+
+  h1{
+    margin:0 0 14px;
+    font-size:clamp(24px,4.2vw,32px);
+    font-weight:800;
+    line-height:1.25;
+    letter-spacing:-.01em;
+    color:#fff;
+  }
+  h1 .accent{ color:#E50914; }
+
+  .lead{
+    margin:0 0 26px;
+    font-size:15.5px;
+    line-height:1.75;
+    color:#a6a6a6;
+  }
+  .lead strong{ color:#fff; font-weight:600; }
+
+  /* 要点列表 */
+  .points{
+    list-style:none;
+    margin:0 0 30px;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:11px;
+  }
+  .points li{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    padding:13px 16px;
+    font-size:14px;
+    line-height:1.6;
+    color:#c8c8c8;
+    border-radius:6px;
+    border:1px solid rgba(255,255,255,.07);
+    background:rgba(255,255,255,.035);
+    transition:background .2s, border-color .2s, transform .2s;
+  }
+  .points li:hover{
+    background:rgba(255,255,255,.065);
+    border-color:rgba(255,255,255,.13);
+    transform:translateX(2px);
+  }
+  .points li svg{
+    flex:none;
+    width:18px; height:18px;
+    margin-top:1px;
+    color:#E50914;
+  }
+  .points li strong{ color:#fff; font-weight:600; }
+
+  /* 按钮区 */
+  .actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .btn{
+    font:inherit;
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:.02em;
+    padding:13px 28px;
+    border:none;
+    border-radius:4px;
+    cursor:pointer;
+    transition:background .2s, color .2s, transform .12s, box-shadow .2s;
+  }
+  .btn:active{ transform:scale(.97); }
+
+  .btn-primary{
+    flex:1;
+    min-width:150px;
+    background:#E50914;
+    color:#fff;
+    box-shadow:0 8px 22px rgba(229,9,20,.32);
+  }
+  .btn-primary:hover{
+    background:#f6121d;
+    box-shadow:0 10px 28px rgba(229,9,20,.45);
+  }
+
+  .btn-ghost{
+    background:rgba(255,255,255,.08);
+    color:#e0e0e0;
+    font-weight:500;
+  }
+  .btn-ghost:hover{
+    background:rgba(255,255,255,.16);
+    color:#fff;
+  }
+
+  /* ================= 入场错峰动画 ================= */
+  .eyebrow, h1, .lead, .points, .actions{
+    opacity:0;
+    animation:rise .55s cubic-bezier(.2,.8,.25,1) forwards;
+  }
+  .eyebrow{ animation-delay:.18s; }
+  h1      { animation-delay:.24s; }
+  .lead   { animation-delay:.30s; }
+  .points { animation-delay:.37s; }
+  .actions{ animation-delay:.45s; }
+  @keyframes rise{
+    from{ opacity:0; transform:translateY(12px); }
+    to  { opacity:1; transform:translateY(0); }
+  }
+
+  /* ================= 移动端 ================= */
+  @media (max-width:520px){
+    .modal{ padding:36px 22px 26px; border-radius:8px; }
+    h1{ font-size:22px; }
+    .lead{ font-size:14.5px; }
+    .points li{ font-size:13.5px; padding:12px 13px; }
+    .actions .btn{ flex:1; min-width:0; padding:13px 16px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- 背景氛围 -->
+  <div class="backdrop">
+    <div class="grid" id="grid"></div>
+  </div>
+  <div class="vignette"></div>
+
+  <!-- 公告弹窗 -->
+  <div class="overlay" id="overlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="noticeTitle">
+
+      <button class="close" id="closeBtn" aria-label="关闭公告">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+             stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <path d="M6 6l12 12M18 6L6 18"/>
+        </svg>
+      </button>
+
+      <div class="eyebrow"><span class="dot"></span>重要公告</div>
+
+      <h1 id="noticeTitle">本软件 <span class="accent">完全免费</span></h1>
+
+      <p class="lead">
+        请勿相信视频中出现的任何<strong>博彩</strong>、<strong>刷单</strong>等
+        黑产诈骗广告，谨防上当受骗。
+      </p>
+
+      <ul class="points">
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2 4 5.5v6c0 5 3.4 9.3 8 10.5 4.6-1.2 8-5.5 8-10.5v-6L12 2z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+          <span>本软件<strong>永久免费</strong>，不收取任何费用，不存在“激活码”“会员解锁”等付费项目。</span>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13.5"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <span>片中出现的<strong>博彩、刷单、兼职、投资</strong>等广告均为第三方黑产内容，与本软件无关。</span>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="10" rx="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <span>请勿添加陌生联系方式、勿扫描来路不明的二维码、勿下载未知应用，保护好个人信息与财产安全。</span>
+        </li>
+      </ul>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="okBtn">我已知晓</button>
+        <button class="btn btn-ghost" id="laterBtn">不再提示</button>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+  /* ---------- 生成背景海报墙 ---------- */
+  (function buildGrid(){
+    const grid = document.getElementById('grid');
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < 30; i++) {
+      const d = document.createElement('div');
+      d.className = 'poster';
+      const h = Math.floor(Math.random() * 360);
+      d.style.background =
+        `linear-gradient(${140 + Math.random() * 80}deg,
+         hsl(${h} 28% 20%),
+         hsl(${(h + 40) % 360} 22% 7%))`;
+      frag.appendChild(d);
+    }
+    grid.appendChild(frag);
+  })();
+
+  /* ---------- 关闭逻辑 ---------- */
+  const overlay  = document.getElementById('overlay');
+  const modal    = document.querySelector('.modal');
+  let closed = false;
+
+  function closeNotice(){
+    if (closed) return;
+    closed = true;
+    overlay.classList.add('closing');
+    modal.classList.add('closing');
+    setTimeout(() => { overlay.style.display = 'none'; }, 260);
+  }
+
+  document.getElementById('okBtn').addEventListener('click', closeNotice);
+  document.getElementById('laterBtn').addEventListener('click', closeNotice);
+  document.getElementById('closeBtn').addEventListener('click', closeNotice);
+
+  /* 点击遮罩空白处关闭 */
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeNotice();
+  });
+
+  /* ESC 关闭 */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeNotice();
+  });
+</script>
+</body>
+</html>
